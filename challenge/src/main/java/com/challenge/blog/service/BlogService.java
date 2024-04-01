@@ -1,19 +1,22 @@
 package com.challenge.blog.service;
 
-import com.challenge.blog.dto.BlogDTO;
+import com.challenge.blog.dto.BlogRequestDTO;
 import com.challenge.blog.dto.GenericResponseDTO;
 import com.challenge.blog.model.BlogModel;
 import com.challenge.blog.repository.BlogRepository;
+import com.challenge.blog.util.CheckUtils;
+import com.challenge.blog.util.GenerateJWT;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,12 +44,16 @@ public class BlogService {
         return ResponseEntity.status(HttpStatus.CREATED).body(blogModel);
     }
 
-    public ResponseEntity<Optional<BlogModel>> find(String request){
+    public ResponseEntity<Object> find(String request){
         Optional<BlogModel> blogModel = blogRepository.findById(request);
+        System.out.println("masuk sini " + blogModel);
+        if(blogModel.isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK).body(new GenericResponseDTO().errorResponse("Data Not Found"));
+        }
         return ResponseEntity.status(HttpStatus.OK).body(blogModel);
     }
 
-    public ResponseEntity<List<BlogModel>> findAll(BlogDTO requestDto){
+    public ResponseEntity<Object> findAll(BlogRequestDTO requestDto){
         List<BlogModel> listBlogModel;
         Integer pageNo=null;
         Integer pageSize=null;
@@ -80,19 +87,19 @@ public class BlogService {
             BlogModel blogModel = blogData.get();
 
             //update data
-            if(title == null || title.equalsIgnoreCase("")){
+            if(CheckUtils.IsNullOrEmpty(title)){
                 blogModel.setTitle(blogModel.getTitle());
             } else{
                 blogModel.setTitle(title);
 
             }
-            if(body == null || body.equalsIgnoreCase("")){
+            if(CheckUtils.IsNullOrEmpty(body)){
                 blogModel.setBody(blogModel.getBody());
             }else{
                 blogModel.setBody(body);
 
             }
-            if(author == null || author.equalsIgnoreCase("")){
+            if(CheckUtils.IsNullOrEmpty(author)){
                 blogModel.setAuthor(blogModel.getAuthor());
             }else{
                 blogModel.setAuthor(author);
@@ -108,10 +115,30 @@ public class BlogService {
 
     }
 
-    public ResponseEntity<GenericResponseDTO> delete(String  request){
+    public ResponseEntity<Object> delete(String  request){
         //save to db
         blogRepository.deleteById(request);
         return ResponseEntity.status(HttpStatus.OK).body(new GenericResponseDTO().successResponse("Delete Success"));
+    }
+
+    public ResponseEntity<Object> checkToken(String username, String token){
+        try{
+            if(CheckUtils.IsNullOrEmpty(username) && CheckUtils.IsNullOrEmpty(token)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new GenericResponseDTO().errorResponse("JWT Fail"));
+            }
+
+            Claims claims = GenerateJWT.validateToken(token);
+
+            if(!claims.getId().equals(username)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new GenericResponseDTO().errorResponse("Not a token with a username " + username));
+            }
+
+        }catch (ExpiredJwtException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new GenericResponseDTO().errorResponse("Token expired"));
+        }catch (Exception x){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new GenericResponseDTO().errorResponse("Token failed"));
+        }
+        return null;
     }
 
 }

@@ -1,6 +1,6 @@
 package com.challenge.blog.model;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "blog_post")
