@@ -20,8 +20,8 @@ public class GenerateJWT {
                 //Set payload classes
                 .setId(user)
                 .setIssuedAt(now)
-                .setSubject("bootcamp")
-                .setIssuer("EKSAD")
+                .setSubject("hilmi")
+                .setIssuer("HILMI")
                 .setExpiration(new Date(System.currentTimeMillis()+1*300*1000))
                 .signWith(SignatureAlgorithm.HS256, "PASSWORD");
 
