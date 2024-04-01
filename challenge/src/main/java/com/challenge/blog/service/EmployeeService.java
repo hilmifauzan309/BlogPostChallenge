@@ -1,7 +1,6 @@
 package com.challenge.blog.service;
 
 import com.challenge.blog.dto.GenericResponseDTO;
-import com.challenge.blog.model.BlogModel;
 import com.challenge.blog.model.EmployeeModel;
 import com.challenge.blog.repository.EmployeeRepository;
 import com.challenge.blog.util.CheckUtils;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class EmployeeService {

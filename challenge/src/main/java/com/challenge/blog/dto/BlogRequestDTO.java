@@ -1,7 +1,5 @@
 package com.challenge.blog.dto;
 
-import jakarta.persistence.Column;
-
 public class BlogRequestDTO {
     private String id;
     private String title;
